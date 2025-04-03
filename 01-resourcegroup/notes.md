@@ -1,3 +1,5 @@
+Creating a resource group in Azure with an Application Object ID
+
 az login
 az account set --subscription "your subscription id"
 
@@ -49,3 +51,16 @@ azurerm_resource_group.appgrp: Still creating... [10s elapsed]
 azurerm_resource_group.appgrp: Creation complete after 11s [id=/subscriptions/700cd528-e89f-4c0c-81b6-2196bb404191/resourceGroups/app-grp]
 
 Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+
+
+
+
+
+AzurePortal>Entra>app registration> New Registration Register app give app ther contributor permission
+
+
+where to get clinet id and secert 
+	go to your app registration you just created and copy paste your application id and ten ID
+	under the manage blade go to certs and secrets adnn a new clint secert copy paste the value that as your clinet secert
+
+	
