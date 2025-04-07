@@ -1,232 +1,100 @@
-# Terraform Configuration Notes
+📒 Notes on Terraform Networking and Configuration
 
-This document outlines a Terraform setup for Azure infrastructure using multiple configuration files, local values, and key Azure resources.
+🔗 Useful Links
 
----
+Virtual Network (azurerm_virtual_network)
 
-## Project Structure
-To keep the configuration modular and maintainable, we'll split the Terraform files as follows:
-terraform_project/
-├── main.tf              # Core configuration and provider setup
-├── variables.tf         # Variable declarations
-├── outputs.tf           # Output definitions
-├── locals.tf            # Local values for reusability
-├── network.tf           # Networking resources (VNet, Subnet, NSG, etc.)
-└── interfaces.tf        # Network interfaces and related resources
+Terraform Expressions and Types
 
-text
+Network Interface (azurerm_network_interface)
 
+Public IP Data Source (azurerm_public_ip)
 
+Network Security Group (azurerm_network_security_group)
 
+Subnet Network Security Group Association (azurerm_subnet_network_security_group_association)
 
+📌 Using Local Values
 
+Local values are a convenient way to avoid repetition and simplify Terraform configurations.
 
-
----
-
-## Key Resources and Concepts
-
-### 1. Local Values (`locals.tf`)
-Local values allow us to define reusable expressions or computed values within the configuration.  
-[Reference: Terraform Types and Expressions](https://developer.hashicorp.com/terraform/language/expressions/types)
-
-```
-# locals.tf
 locals {
-  resource_group_name = "my-resource-group"
-  location            = "East US"
-  vnet_name           = "my-vnet"
-  subnet_name         = "my-subnet"
-  nsg_name            = "my-nsg"
-  common_tags = {
-    Environment = "Dev"
-    Project     = "TerraformDemo"
-  }
-}
-2. Virtual Network (network.tf)
-Defines an Azure Virtual Network (VNet).
+  resource_location = "EastUS"
 
-Reference: azurerm_virtual_network
-
-
-
-
-
-
-
-
-# network.tf
-resource "azurerm_virtual_network" "vnet" {
-  name                = local.vnet_name
-  resource_group_name = local.resource_group_name
-  location            = local.location
-  address_space       = ["10.0.0.0/16"]
-
-  tags = local.common_tags
-}
-3. Network Security Group (network.tf)
-Defines a Network Security Group (NSG) to control traffic.
-
-Reference: azurerm_network_security_group
-
-
-
-
-
-
-
-
-# network.tf
-resource "azurerm_network_security_group" "nsg" {
-  name                = local.nsg_name
-  resource_group_name = local.resource_group_name
-  location            = local.location
-
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+  virtual_network = {
+    name            = "app-network"
+    address_prefixes = ["10.0.0.0/16"]
   }
 
-  tags = local.common_tags
-}
-4. Subnet and NSG Association (network.tf)
-Associates a subnet with an NSG.
-
-Reference: azurerm_subnet_network_security_group_association
-
-
-
-
-
-
-
-
-# network.tf
-resource "azurerm_subnet" "subnet" {
-  name                 = local.subnet_name
-  resource_group_name  = local.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
-}
-
-resource "azurerm_subnet_network_security_group_association" "subnet_nsg_assoc" {
-  subnet_id                 = azurerm_subnet.subnet.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-5. Network Interface (interfaces.tf)
-Creates a network interface for a VM or other resource.
-
-Reference: azurerm_network_interface
-
-
-
-
-
-
-
-
-# interfaces.tf
-resource "azurerm_network_interface" "nic" {
-  name                = "my-nic"
-  resource_group_name = local.resource_group_name
-  location            = local.location
-
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-  }
-
-  tags = local.common_tags
-}
-6. Data Source: Public IP (interfaces.tf)
-Fetches information about an existing public IP resource.
-
-Reference: azurerm_public_ip (data source)
-
-
-
-
-
-
-
-
-# interfaces.tf
-data "azurerm_public_ip" "existing_ip" {
-  name                = "my-existing-public-ip"
-  resource_group_name = local.resource_group_name
-}
-
-output "public_ip_address" {
-  value = data.azurerm_public_ip.existing_ip.ip_address
-}
-Main Configuration (main.tf)
-Sets up the Azure provider and ties everything together.
-
-
-
-
-
-
-
-
-# main.tf
-provider "azurerm" {
-  features {}
-}
-
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+  subnets = [
+    {
+      name            = "websubnet01"
+      address_prefixes = ["10.0.0.0/24"]
+    },
+    {
+      name            = "appsubnet01"
+      address_prefixes = ["10.0.1.0/24"]
     }
-  }
-}
-Variables (variables.tf)
-Defines input variables (optional for customization).
-
-
-
-
-
-
-
-
-# variables.tf
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-  default     = "my-resource-group"
+  ]
 }
 
-variable "location" {
-  description = "Azure region"
-  type        = string
-  default     = "East US"
-}
-Outputs (outputs.tf)
-Exposes useful information after deployment.
+💡 Benefits of Using Local Values
 
+Reduces repetition
 
+Improves readability
 
+Centralizes configuration for easy modifications
 
+📌 Splitting Terraform Configuration Files
 
+Terraform supports splitting configurations into multiple files for better organization and scalability.
 
+📁 Typical Structure
 
+/example-code/
+├── main.tf
+├── locals.tf
+├── network.tf
+├── security.tf
+├── outputs.tf
+├── variables.tf
 
-# outputs.tf
-output "vnet_id" {
-  value = azurerm_virtual_network.vnet.id
-}
+📌 Purpose of Each File
 
-output "subnet_id" {
-  value = azurerm_subnet.subnet.id
-}
+main.tf - Contains the core infrastructure definition (like resource groups and providers).
+
+locals.tf - Defines local variables used across multiple files.
+
+network.tf - Defines network components (VNets, Subnets, NICs, etc.)
+
+security.tf - Defines security components (NSGs, Associations, Rules, etc.)
+
+outputs.tf - Specifies outputs to be displayed after terraform apply.
+
+variables.tf - Defines all variables used throughout the project.
+
+📌 Best Practices
+
+Use Local Values:
+
+To keep configuration DRY (Don’t Repeat Yourself)
+
+To centralize common configuration variables
+
+Split Files By Purpose:
+
+Separate files for networking, security, variables, etc., for better readability and modularization.
+
+Consistent Naming Conventions:
+
+Use consistent naming schemes for resources to avoid confusion.
+
+Use terraform.tfvars for Variables:
+
+Define variables separately for different environments (e.g., production.tfvars, dev.tfvars).
+
+📌 Resources to Explore
+
+The official AzureRM provider documentation is your best friend for specific resource configurations.
+
