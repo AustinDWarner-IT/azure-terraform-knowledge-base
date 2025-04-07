@@ -18,7 +18,7 @@ This configuration creates:
 
 ### Code Breakdown
 #### Provider Configuration
-```hcl
+```
 provider "azurerm" {
   features {}
   client_id       = ""
@@ -29,26 +29,26 @@ provider "azurerm" {
 Configures the azurerm provider with credentials for authentication.
 The features {} block is required but left empty as no specific features are customized.
 Resource Group
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_resource_group" "app-grp" {
   name     = "app-grp"
   location = "North Europe"
 }
 Creates a resource group named app-grp in the North Europe region.
 Storage Account
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_storage_account" "appstore0154545454" {
   name                     = "appstore0154545454"
   resource_group_name      = azurerm_resource_group.appgrp.name
@@ -60,13 +60,13 @@ Provisions a storage account named appstore0154545454.
 References the resource group dynamically using azurerm_resource_group.appgrp.name.
 Uses the Standard tier with LRS (Locally Redundant Storage).
 Blob Container
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_storage_container" "scripts" {
   name                  = "scripts"
   storage_account_id    = azurerm_storage_account.appstore0154545454.id
@@ -74,13 +74,13 @@ resource "azurerm_storage_container" "scripts" {
 Creates a container named scripts within the storage account.
 Links to the storage account using its id.
 Blob File
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_storage_blob" "testfile" {
   name                   = "testfile.txt"
   storage_account_name   = azurerm_storage_account.appstore0154545454.name
@@ -101,26 +101,26 @@ Code Breakdown
 Provider Configuration
 Identical to the first version.
 Resource Group
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_resource_group" "appgrp" {
   name     = "app-grp"
   location = "North Europe"
 }
 Same as the first version, but the resource name is appgrp (no hyphen).
 Storage Account
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_storage_account" "appstore0154545454" {
   name                     = "appstore0154545454"
   resource_group_name      = "app-grp"
@@ -130,26 +130,26 @@ resource "azurerm_storage_account" "appstore0154545454" {
 }
 Hardcodes the resource group name ("app-grp") instead of using a reference.
 Blob Container
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_storage_container" "scripts" {
   name                  = "scripts"
   storage_account_id    = "/subscriptions/700cd528-e89f-4c0c-81b6-2196bb404191/resourceGroups/app-grp/providers/Microsoft.Storage/storageAccounts/appstore0154545454"
 }
 Uses a hardcoded ARM resource ID for the storage account instead of a dynamic reference.
 Blob File
-hcl
 
-Collapse
 
-Wrap
 
-Copy
+
+
+
+
 resource "azurerm_storage_blob" "testfile" {
   name                   = "testfile.txt"
   storage_account_name   = "appstore0154545454"
